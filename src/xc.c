@@ -131,6 +131,7 @@ refNModels, INF *I){
       
       /*
       if(IsLowChar(AL, readerBuffer[idxPos]) == 1){
+        WriteNBits(1, log2(AL->nLow), Writter);
         #ifdef ESTIMATE
         if(P->estim != 0)
           fprintf(IAE, "%.3g\n", log2(AL->cardinality));

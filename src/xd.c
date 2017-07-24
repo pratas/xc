@@ -276,23 +276,7 @@ int32_t main(int argc, char *argv[]){
   clock_t     stop = 0, start = clock();
   
   if((help = ArgsState(DEFAULT_HELP, p, argc, "-h")) == 1 || argc < 2){
-    fprintf(stderr,
-    "Usage: XD [OPTIONS]... -r [FILE]  [FILE]:[...]                     \n"
-    "Decompress a text sequence compressed by XC.                       \n"
-    "                                                                   \n"
-    "Non-mandatory arguments:                                           \n"
-    "                                                                   \n"
-    "  -h                    give this help,                            \n"
-    "  -v                    verbose mode (more information),           \n"
-    "                                                                   \n"
-    "  -r <FILE>             reference file,                            \n"
-    "                                                                   \n"
-    "Mandatory arguments:                                               \n"
-    "                                                                   \n"
-    "  <FILE>                file to uncompress (last argument). For    \n"
-    "                        more files use splitting \":\" characters. \n"
-    "                                                                   \n"
-    "Report bugs to pratas@ua.pt>.                                      \n");
+    PrintMenuD();
     return EXIT_SUCCESS;
     }
 
