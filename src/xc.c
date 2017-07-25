@@ -115,6 +115,7 @@ refNModels, INF *I){
   for(x = 0 ; x < AL->cardinality ; ++x)
     WriteNBits(AL->toChars[x],          8, Writter);
   WriteNBits((int) (P->gamma * 65536), 32, Writter);
+  WriteNBits(C->nLines,                16, Writter);
   WriteNBits(P->nModels,               16, Writter);
   for(n = 0 ; n < P->nModels ; ++n){
     WriteNBits(cModels[n]->ctx,        16, Writter);

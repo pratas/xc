@@ -27,7 +27,7 @@ void Decompress(Parameters *P, CModel **cModels, uint8_t id){
   uint64_t    nSymbols = 0;
   uint32_t    n, k, x, cModel, totModels;
   double      *cModelWeight, cModelTotalWeight = 0;
-  int32_t     idx = 0, idxOut = 0;
+  int32_t     idx = 0, idxOut = 0, nCacheLines;
   uint8_t     *outBuffer, sym = 0, *pos;
   CBUF        *symBuf = CreateCBuffer(BUFFER_SIZE, BGUARD);
   PModel      **pModel, *MX;
@@ -58,6 +58,7 @@ void Decompress(Parameters *P, CModel **cModels, uint8_t id){
     AL->revMap[(uint8_t) AL->toChars[x]] = x;
     }
   P[id].gamma            = ReadNBits(32, Reader) / 65536.0;
+  nCacheLines            = ReadNBits(16, Reader);
   P[id].nModels          = ReadNBits(16, Reader);
   for(k = 0 ; k < P[id].nModels ; ++k){
     P[id].model[k].ctx   = ReadNBits(16, Reader);
@@ -326,6 +327,7 @@ int32_t main(int argc, char *argv[]){
     for(k = 0 ; k < cardinality ; ++k)
       garbage      = ReadNBits(8,  Reader);
     P[n].gamma     = ReadNBits(32, Reader) / 65536.0;
+    garbage        = ReadNBits(16, Reader);
     P[n].nModels   = ReadNBits(16, Reader);
     P[n].model     = (ModelPar *) Calloc(P[n].nModels, sizeof(ModelPar));
     for(k = 0 ; k < P[n].nModels ; ++k){
