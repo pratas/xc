@@ -35,6 +35,7 @@ refNModels, INF *I){
   PModel      **pModel, *MX;
   FloatPModel *PT;
   CBUF        *symBuf = CreateCBuffer(BUFFER_SIZE, BGUARD);
+  CACHE       *C = CreateCache(100, '\n');
 
   if(P->verbose)
     fprintf(stderr, "Analyzing data and creating models ...\n");
@@ -227,6 +228,8 @@ refNModels, INF *I){
   Free(readerBuffer);
   RemoveCBuffer(symBuf);
   RemoveAlphabet(AL);
+  RemoveCache(C);
+
   fclose(Reader);
 
   if(P->verbose == 1)
