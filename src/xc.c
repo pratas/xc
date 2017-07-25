@@ -12,7 +12,7 @@
 #include "alphabet.h"
 #include "levels.h"
 #include "common.h"
-#include "context.h"
+#include "cm.h"
 #include "bitio.h"
 #include "arith.h"
 #include "arith_aux.h"
@@ -81,7 +81,7 @@ refNModels, INF *I){
   for(n = 0 ; n < P->nModels ; ++n){
     if(P->model[n].type == TARGET){
       cModels[n] = CreateCModel(P->model[n].ctx, P->model[n].den, TARGET, 
-      P->model[n].edits, P->model[n].eDen, AL->cardinality);
+      P->model[n].edits, P->model[n].eDen, AL->cardinality, P->model[n].vert);
       }
     }
 
@@ -120,6 +120,7 @@ refNModels, INF *I){
     WriteNBits(cModels[n]->edits,       8, Writter);
     WriteNBits(cModels[n]->SUBS.eDen,  32, Writter);
     WriteNBits(P->model[n].type,        1, Writter);
+    WriteNBits(P->model[n].vert,        1, Writter);
     }
 
   I[id].header = _bytes_output;
@@ -265,7 +266,7 @@ CModel **LoadReference(Parameters *P){
   for(n = 0 ; n < P->nModels ; ++n)
     if(P->model[n].type == REFERENCE)
       cModels[n] = CreateCModel(P->model[n].ctx, P->model[n].den, REFERENCE, 
-      P->model[n].edits, P->model[n].eDen, AL->cardinality);
+      P->model[n].edits, P->model[n].eDen, AL->cardinality, P->model[n].vert);
 
   nSymbols = NBytesInFile(Reader);
 
@@ -315,7 +316,7 @@ int32_t main(int argc, char *argv[]){
   char        **p = *&argv, **xargv, *xpl = NULL;
   CModel      **refModels;
   int32_t     xargc = 0, cardinality = 1;
-  uint32_t    n, k, refNModels;
+  uint32_t    n, k, refNModels, tarNModels, horizontalNModels, verticalNModels;
   uint64_t    totalBytes, headerBytes, totalSize;
   clock_t     stop = 0, start = clock();
   double      gamma;
@@ -347,7 +348,8 @@ int32_t main(int argc, char *argv[]){
 
   P->nModels = 0;
   for(n = 1 ; n < argc ; ++n)
-    if(strcmp(argv[n], "-rm") == 0 || strcmp(argv[n], "-tm") == 0)
+    if(strcmp(argv[n], "-rhm") == 0 || strcmp(argv[n], "-rvm") == 0 || 
+       strcmp(argv[n], "-thm") == 0 || strcmp(argv[n], "-tvm") == 0)
       P->nModels += 1;
 
   if(P->nModels == 0 && P->level == 0)
@@ -357,7 +359,8 @@ int32_t main(int argc, char *argv[]){
     xpl = GetLevels(P->level);
     xargc = StrToArgv(xpl, &xargv);
     for(n = 1 ; n < xargc ; ++n)
-      if(strcmp(xargv[n], "-rm") == 0 || strcmp(xargv[n], "-tm") == 0)
+      if(strcmp(xargv[n], "-rhm") == 0 || strcmp(xargv[n], "-thm") == 0 ||
+         strcmp(xargv[n], "-rvm") == 0 || strcmp(xargv[n], "-tvm") == 0)
         P->nModels += 1;
     }
 
@@ -370,27 +373,69 @@ int32_t main(int argc, char *argv[]){
 
   k = 0;
   refNModels = 0;
-  for(n = 1 ; n < argc ; ++n)
-    if(strcmp(argv[n], "-rm") == 0){
-      P->model[k++] = ArgsUniqModel(argv[n+1], 1);
+  tarNModels = 0;
+  horizontalNModels = 0;
+  verticalNModels = 0;
+
+  // LOAD REFERENCE MODELS FROM ARGS
+  for(n = 1 ; n < argc ; ++n){
+    if(strcmp(argv[n], "-rhm") == 0){
+      P->model[k++] = ArgsUniqModel(argv[n+1], 1, 0);
       ++refNModels;
+      ++horizontalNModels;
       }
-  if(P->level != 0){
-    for(n = 1 ; n < xargc ; ++n)
-      if(strcmp(xargv[n], "-rm") == 0){
-        P->model[k++] = ArgsUniqModel(xargv[n+1], 1);
-        ++refNModels;
-        }
+    if(strcmp(argv[n], "-rvm") == 0){
+      P->model[k++] = ArgsUniqModel(argv[n+1], 1, 1);
+      ++refNModels;
+      ++verticalNModels;
+      }
     }
 
-  for(n = 1 ; n < argc ; ++n)
-    if(strcmp(argv[n], "-tm") == 0)
-      P->model[k++] = ArgsUniqModel(argv[n+1], 0);
+  // LOAD REFERENCE MODELS FROM XARGS
   if(P->level != 0){
-    for(n = 1 ; n < xargc ; ++n)
-      if(strcmp(xargv[n], "-tm") == 0)
-        P->model[k++] = ArgsUniqModel(xargv[n+1], 0);
+    for(n = 1 ; n < xargc ; ++n){
+      if(strcmp(xargv[n], "-rhm") == 0){
+        P->model[k++] = ArgsUniqModel(xargv[n+1], 1, 0);
+        ++refNModels;
+        ++horizontalNModels;
+        }
+      if(strcmp(xargv[n], "-rvm") == 0){
+        P->model[k++] = ArgsUniqModel(xargv[n+1], 1, 1);
+        ++refNModels;
+        ++verticalNModels;
+        }
+      }
     }
+
+  // LOAD TARGET MODELS FROM ARGS
+  for(n = 1 ; n < argc ; ++n){
+    if(strcmp(argv[n], "-thm") == 0){
+      P->model[k++] = ArgsUniqModel(argv[n+1], 0, 0);
+      ++tarNModels;
+      ++horizontalNModels;
+      }
+    if(strcmp(argv[n], "-tvm") == 0){
+      P->model[k++] = ArgsUniqModel(argv[n+1], 0, 1);
+      ++tarNModels;
+      ++verticalNModels;
+      }
+    }
+
+  // LOAD TARGET MODELS FROM XARGS
+  if(P->level != 0){
+    for(n = 1 ; n < xargc ; ++n){
+      if(strcmp(xargv[n], "-thm") == 0){
+        P->model[k++] = ArgsUniqModel(xargv[n+1], 0, 0);
+        ++tarNModels;
+        ++horizontalNModels;
+        }
+      if(strcmp(xargv[n], "-thm") == 0){
+        P->model[k++] = ArgsUniqModel(xargv[n+1], 0, 1);
+        ++tarNModels;
+        ++verticalNModels;
+        }
+      }
+    } 
 
   gamma = DEFAULT_GAMMA;
   for(n = 1 ; n < xargc ; ++n) 

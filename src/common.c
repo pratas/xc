@@ -396,7 +396,7 @@ char *ArgsString(char *def, char *arg[], uint32_t n, char *str)
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-ModelPar ArgsUniqModel(char *str, uint8_t type)
+ModelPar ArgsUniqModel(char *str, uint8_t type, uint8_t vert)
   {
   uint32_t  ctx, den, edits, eDen;
   ModelPar  Mp;
@@ -415,6 +415,7 @@ ModelPar ArgsUniqModel(char *str, uint8_t type)
     Mp.edits = edits;
     Mp.eDen  = eDen;
     Mp.type  = type;
+    Mp.vert  = vert;
     return Mp;
     }
   else{
@@ -542,6 +543,8 @@ void PrintArgs(Parameters *P)
     if(P->model[n].type == 1)
       {
       fprintf(stderr, "Reference model %d:\n", n+1);
+      fprintf(stderr, "  [+] Type of model ................ %s\n",
+      P->model[n].vert == 1 ? "vertical" : "horizontal"); 
       fprintf(stderr, "  [+] Context order ................ %u\n", 
       P->model[n].ctx);
       fprintf(stderr, "  [+] Alpha denominator ............ %u\n", 
@@ -551,12 +554,14 @@ void PrintArgs(Parameters *P)
       if(P->model[n].edits != 0)
         fprintf(stderr, "  [+] Substitutions alpha den ...... %u\n",
         P->model[n].eDen);
-    }
+      }
 
   for(n = 0 ; n < P->nModels ; ++n)
     if(P->model[n].type == 0)
       {
       fprintf(stderr, "Target model %d:\n", n+1);
+      fprintf(stderr, "  [+] Type of model ................ %s\n",
+      P->model[n].vert == 1 ? "vertical" : "horizontal");
       fprintf(stderr, "  [+] Context order ................ %u\n",
       P->model[n].ctx);
       fprintf(stderr, "  [+] Alpha denominator ............ %u\n",

@@ -11,7 +11,7 @@
 #include "buffer.h"
 #include "alphabet.h"
 #include "common.h"
-#include "context.h"
+#include "cm.h"
 #include "bitio.h"
 #include "arith.h"
 #include "arith_aux.h"
@@ -64,6 +64,7 @@ void Decompress(Parameters *P, CModel **cModels, uint8_t id){
     P[id].model[k].edits = ReadNBits( 8, Reader);
     P[id].model[k].eDen  = ReadNBits(32, Reader);
     P[id].model[k].type  = ReadNBits( 1, Reader);
+    P[id].model[k].vert  = ReadNBits( 1, Reader);
     }
 
   PrintAlphabet(AL);
@@ -88,8 +89,9 @@ void Decompress(Parameters *P, CModel **cModels, uint8_t id){
 
   for(n = 0 ; n < P[id].nModels ; ++n){
     if(P[id].model[n].type == TARGET)
-      cModels[n] = CreateCModel(P[id].model[n].ctx , P[id].model[n].den, 
-      TARGET, P[id].model[n].edits, P[id].model[n].eDen, AL->cardinality);
+      cModels[n] = CreateCModel(P[id].model[n].ctx , P[id].model[n].den, TARGET, 
+      P[id].model[n].edits, P[id].model[n].eDen, AL->cardinality, 
+      P[id].model[n].vert);
     }
 
   i = 0;
@@ -221,7 +223,7 @@ CModel **LoadReference(Parameters *P){
   for(n = 0 ; n < P->nModels ; ++n)
     if(P->model[n].type == REFERENCE)
       cModels[n] = CreateCModel(P->model[n].ctx, P->model[n].den, REFERENCE,
-      P->model[n].edits, P->model[n].eDen, AL->cardinality);
+      P->model[n].edits, P->model[n].eDen, AL->cardinality, P->model[n].vert);
 
   nSymbols = NBytesInFile(Reader);
 
@@ -331,6 +333,7 @@ int32_t main(int argc, char *argv[]){
       P[n].model[k].edits = ReadNBits( 8, Reader); 
       P[n].model[k].eDen  = ReadNBits(32, Reader); 
       P[n].model[k].type  = ReadNBits( 1, Reader);
+      P[n].model[k].vert  = ReadNBits( 1, Reader);
       if(P[n].model[k].type == 1)
         ++refNModels;
       }

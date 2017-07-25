@@ -1,7 +1,7 @@
 #ifndef COMMON_H_INCLUDED
 #define COMMON_H_INCLUDED
 
-#include "context.h"
+#include "cm.h"
 #include "defs.h"
 
 typedef struct{
@@ -34,7 +34,7 @@ char        *CloneString     (char *   );
 char        *RepString       (const char *, const char *, const char *);
 uint32_t    ArgsNum          (uint32_t , char *[], uint32_t, char *, uint32_t,
                               uint32_t);
-ModelPar    ArgsUniqModel    (char *, uint8_t);
+ModelPar    ArgsUniqModel    (char *, uint8_t, uint8_t);
 ModelPar    ArgsModel        (uint32_t , char *[], uint32_t, char *);
 double      ArgsDouble       (double, char *[], uint32_t, char *);
 uint8_t     ArgsState        (uint8_t  , char *[], uint32_t, char *);
