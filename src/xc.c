@@ -10,6 +10,7 @@
 #include "msg.h"
 #include "buffer.h"
 #include "alphabet.h"
+#include "cmcache.h"
 #include "levels.h"
 #include "common.h"
 #include "cm.h"

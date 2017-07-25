@@ -10,6 +10,7 @@
 #include "defs.h"
 #include "buffer.h"
 #include "alphabet.h"
+#include "cmcache.h"
 #include "common.h"
 #include "cm.h"
 #include "bitio.h"
