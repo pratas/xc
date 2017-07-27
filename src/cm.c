@@ -34,6 +34,131 @@ static uint64_t ZHASH(uint64_t z){
   }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+// TEMPLATES COORDINATES
+//
+
+//
+//            1
+//            X  
+//
+static Coords template0[] = {{-1, 0}};
+
+//
+//            2
+//            1
+//            X
+//
+static Coords template2[] = {{-1, 0}, {-2, 0}};
+
+//
+//            3
+//            2
+//            1
+//            X
+//
+static Coords template3[] = {{-1, 0}, {-2, 0}, {-3, 0}};
+
+//
+//            4
+//            3
+//            2
+//            1
+//            X
+//
+static Coords template4[] = {{-1, 0}, {-2, 0}, {-3, 0}, {-4, 0}};
+
+//
+//            5
+//            4
+//            3
+//            2
+//            1
+//            X
+//
+static Coords template5[] = {{-1, 0}, {-2, 0}, {-3, 0}, {-4, 0}, {-5, 0}};
+
+//
+//            6
+//            5
+//            4
+//            3
+//            2
+//            1
+//            X
+//
+static Coords template6[] = {{-1, 0}, {-2, 0}, {-3, 0}, {-4, 0}, {-5, 0}, {-6,0}};
+
+//
+//            7
+//            6
+//            5
+//            4
+//            3
+//            2
+//            1
+//            X
+//
+static Coords template7[] = {{-1, 0}, {-2, 0}, {-3, 0}, {-4, 0}, {-5, 0}, {-6,0}, {-7, 0}};
+
+//
+//            8
+//            7
+//            6
+//            5
+//            4
+//            3
+//            2
+//            1
+//            X
+//
+static Coords template8[] = {{-1, 0}, {-2, 0}, {-3, 0}, {-4, 0}, {-5, 0}, {-6,0}, {-7, 0}, {-8, 0}};
+
+//
+//         2
+//         1  
+//            X
+//
+static Coords template9[] = {{-1, -1}, {-1, -2}};
+
+//
+//         
+//      2  1  
+//            X
+//
+static Coords template10[] = {{-1, -1}, {-2, -1}};
+
+//
+//         
+//               1  2
+//            X
+//
+static Coords template11[] = {{1, -1}, {2, -1}};
+
+//
+//            2
+//         1  X
+//
+static Coords template12[] = {{0, -1}, {-1, 0}};
+
+//
+//         3  2
+//         1  X
+//
+static Coords template13[] = {{0, -1}, {-1, 0}, {-1, -1}};
+
+//
+//         3  2  4
+//         1  X
+//
+static Coords template14[] = {{0, -1}, {-1, 0}, {-1, -1}, {-1, 1}};
+
+//
+//         3  2  4
+//      5  1  X
+//
+static Coords template15[] = {{0, -1}, {-1, 0}, {-1, -1}, {-1, 1}, {0, -2}};
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 static void InitHashTable(CModel *M){ 
   M->hTable.entries      = (Entry   **) Calloc(M->hTable.size, sizeof(Entry *));

@@ -35,7 +35,7 @@ refNModels, INF *I){
   PModel      **pModel, *MX;
   FloatPModel *PT;
   CBUF        *symBuf = CreateCBuffer(BUFFER_SIZE, BGUARD);
-  CACHE       *C = CreateCache(100, '\n');
+  CACHE       *C = CreateCache(50, '\n');
 
   if(P->verbose)
     fprintf(stderr, "Analyzing data and creating models ...\n");

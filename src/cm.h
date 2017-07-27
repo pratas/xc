@@ -27,32 +27,32 @@ typedef U8   HCC;                // Size of context counters for hash tables
 typedef U8   ENTMAX;                // Entry size (nKeys for each hIndex)
 
 typedef struct{
-  uint64_t  key;            //The key stored in this entry 
-  HCC       *counters;      //The context counters 
+  uint64_t   key;            //The key stored in this entry 
+  HCC        *counters;      //The context counters 
   }
 Entry;
 
 typedef struct{
-  uint32_t  size;           //Size of the hash table
-  uint8_t   *entrySize;     //Number of keys in this entry
-  Entry     **entries;      //The heads of the hash table lists
-  HCC       **zeroCounters;  
+  uint32_t   size;           //Size of the hash table
+  uint8_t    *entrySize;     //Number of keys in this entry
+  Entry      **entries;      //The heads of the hash table lists
+  HCC        **zeroCounters;  
   }
 HashTable;
 
 typedef struct{
-  ACC       *counters;
+  ACC        *counters;
   }
 Array;
 
 typedef struct{
-  uint32_t  in;
-  CBUF      *seq;           // BUFFER FOR EDITED SEQUENCE
-  uint8_t   *mask;          // BUFFER FOR FAILS & HITS
-  uint64_t  idx;            // INDEX FOR UPDATE
-  uint64_t  idx2;           // AUXILIAR INDEX FOR UPDATE
-  uint32_t  threshold;      // DISCARD ABOVE THIS VALUE
-  uint32_t  eDen;           // ALPHA DENOMINATOR FOR THIS MODEL
+  uint32_t   in;
+  CBUF       *seq;           // BUFFER FOR EDITED SEQUENCE
+  uint8_t    *mask;          // BUFFER FOR FAILS & HITS
+  uint64_t   idx;            // INDEX FOR UPDATE
+  uint64_t   idx2;           // AUXILIAR INDEX FOR UPDATE
+  uint32_t   threshold;      // DISCARD ABOVE THIS VALUE
+  uint32_t   eDen;           // ALPHA DENOMINATOR FOR THIS MODEL
   }
 Correct;
 
@@ -84,6 +84,19 @@ typedef struct{
   double     *freqs;
   }
 FloatPModel;
+
+typedef struct{
+  int        row;
+  int        col;
+  }
+Coords;
+
+typedef struct{
+  int        id;
+  int        size;
+  Coords     *position;
+  }
+Template2D;
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 

@@ -6,16 +6,17 @@ void ModelsExplanation(void){
   fprintf(stderr,
   "                                                                         \n"
   "  -rhm <c>:<d>:<m/e>     reference horizontal model (ex:-rhm 13:100:0/0),\n"
-  "  -rvm <c>:<d>:<m/e>     reference vertical model (ex:-rvm 18:1000:1/50),\n"
+  "  -rvm <t>:<d>:<m/e>     reference vertical model (ex:-rvm 4:1000:1/50), \n"
   "  ...                                                                    \n"
   "  -thm <c>:<d>:<m/e>     target horizontal model (ex:-thm 4:1:0/0),      \n"
-  "  -tvm <c>:<d>:<m/e>     target vertical model (ex:-tvm 18:20:2/10),     \n"
+  "  -tvm <t>:<d>:<m/e>     target vertical model (ex:-tvm 3:20:1/10),      \n"
   "  ...                                                                    \n"
   "                         target and reference templates use <c> for      \n"
-  "                         context-order size, <d> for alpha (1/<d>),      \n"
-  "                         <m> to the maximum sets the substitutions,      \n"
-  "                         on the context without being discarded (for     \n"
-  "                         deep contexts), under the estimator <e>,        \n");
+  "                         context-order size, <t> used for vertical       \n"
+  "                         templates, <d> for alpha (1/<d>), <m> to the    \n"
+  "                         maximum sets the substitutions, on the context  \n"
+  "                         without being discarded (for deep contexts),    \n"
+  "                         under the estimator <e>,                        \n");
   } 
 
 void PrintMenu(void){
@@ -42,7 +43,7 @@ void PrintMenu(void){
   ModelsExplanation();
   fprintf(stderr,
   "                                                                       \n"
-  "  -r <FILE>              reference file (\"-r*m\" are loaded here),     \n"
+  "  -r <FILE>              reference file (\"-r*m\" are loaded here),    \n"
   "                                                                       \n"
   "Mandatory arguments:                                                   \n"
   "                                                                       \n"
