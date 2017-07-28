@@ -352,6 +352,23 @@ void GetPModelIdx(U8 *p, CModel *M){
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
+uint64_t GetPModelIdx2D(CModel *M, CACHE *C, int col, Template2D *T, 
+ALPHABET *A){
+  int n;
+  uint64_t idx = 0, prod = 1;
+
+  for(n = 0 ; n < T->size ; ++n){
+    idx += A->alphabet[C->lines[ T->position[n].row + 1  ]
+                               [ T->position[n].col + col] ] * prod;
+    prod *= A->cardinality;
+    }
+
+  M->pModelIdx = idx;
+  return idx;
+  }
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
 uint64_t GetPModelIdxCorr(U8 *p, CModel *M, uint64_t idx){
   return (((idx-*(p-M->ctx)*M->multiplier)*M->nSym)+*p);
   }

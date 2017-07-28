@@ -3,6 +3,8 @@
 
 #include "defs.h"
 #include "buffer.h"
+#include "alphabet.h"
+#include "cmcache.h"
 
 #define WINDOW_SIZE           6    // IT WILL ACCEPT X SUBSTITUTIONS IN 6
 #define ARRAY_MODE            0
@@ -105,6 +107,8 @@ void            HitSUBS              (CModel *);
 void            FailSUBS             (CModel *);
 void            FreeCModel           (CModel *);
 void            GetPModelIdx         (U8 *, CModel *);
+uint64_t        GetPModelIdx2D       (CModel *, CACHE *, int, Template2D *, 
+                                      ALPHABET *);
 uint64_t        GetPModelIdxCorr     (U8 *, CModel *, uint64_t);
 void            CorrectCModelSUBS    (CModel *, PModel *, uint8_t);
 PModel          *CreatePModel        (U32);
