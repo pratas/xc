@@ -15,6 +15,7 @@ CACHE;
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 CACHE      *CreateCache            (uint32_t, uint8_t);
+void       UpdateCache             (CACHE *);
 void       RemoveCache             (CACHE *);
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -

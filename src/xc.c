@@ -35,7 +35,7 @@ refNModels, INF *I){
   PModel      **pModel, *MX;
   FloatPModel *PT;
   CBUF        *symBuf = CreateCBuffer(BUFFER_SIZE, BGUARD);
-  CACHE       *C = CreateCache(50, '\n');
+  CACHE       *C = CreateCache(20, '\n');
   Template2D  *T;
 
   if(P->verbose)
@@ -217,9 +217,11 @@ refNModels, INF *I){
         ++n;
         }
 
-      ++col;
-      if(readerBuffer[idxPos] == '\n' || readerBuffer[idxPos] == '\r') 
+      C->lines[0][col++] = readerBuffer[idxPos];
+      if(readerBuffer[idxPos] == C->splitter || readerBuffer[idxPos] == '\r'){
+        UpdateCache(C);
         col = 0;
+        }
 
       UpdateCBuffer(symBuf);
       }
