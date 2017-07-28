@@ -3,6 +3,8 @@
 
 #include "defs.h"
 
+#define MAX_LINE_CACHE 65535
+
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 typedef struct {
