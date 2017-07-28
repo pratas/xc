@@ -70,6 +70,16 @@ refNModels, INF *I){
       #endif
       }
 
+  uint32_t nTemplates = 0;
+  for(n = 0 ; n < P->nModels ; ++n)
+    if(P->model[n].vert == 1)
+      ++nTemplates;
+
+  T = (Template2D *) Calloc(nTemplates, sizeof(Template2D));
+  for(n = 0, cModel = 0 ; n < P->nModels ; ++n, ++cModel)
+    if(P->model[n].vert == 1)
+      T[cModel] = CreateCTemplate2D(P->model[n].ctx);
+
   pModel        = (PModel  **) Calloc(totModels, sizeof(PModel *));
   for(n = 0 ; n < totModels ; ++n)
     pModel[n]   = CreatePModel(AL->cardinality);
@@ -129,7 +139,7 @@ refNModels, INF *I){
 
   I[id].header = _bytes_output;
 
-  int col = 0;
+  uint32_t col = 0;
   while((k = fread(readerBuffer, 1, BUFFER_SIZE, Reader)))
     for(idxPos = 0 ; idxPos < k ; ++idxPos){
 
@@ -206,6 +216,10 @@ refNModels, INF *I){
           CorrectCModelSUBS(cModels[cModel], pModel[++n], sym);
         ++n;
         }
+
+      ++col;
+      if(readerBuffer[idxPos] == '\n' || readerBuffer[idxPos] == '\r') 
+        col = 0;
 
       UpdateCBuffer(symBuf);
       }
@@ -444,7 +458,7 @@ int32_t main(int argc, char *argv[]){
         ++tarNModels;
         ++horizontalNModels;
         }
-      if(strcmp(xargv[n], "-thm") == 0){
+      if(strcmp(xargv[n], "-tvm") == 0){
         P->model[k++] = ArgsUniqModel(xargv[n+1], 0, 1);
         ++tarNModels;
         ++verticalNModels;
