@@ -106,9 +106,10 @@ int32_t         BestId               (uint32_t *, uint32_t, uint32_t);
 void            HitSUBS              (CModel *);
 void            FailSUBS             (CModel *);
 void            FreeCModel           (CModel *);
+Template2D      CreateCTemplate2D    (int);
 void            GetPModelIdx         (U8 *, CModel *);
-uint64_t        GetPModelIdx2D       (CModel *, CACHE *, int, Template2D *, 
-                                      ALPHABET *);
+uint64_t        GetPModelIdx2D       (CModel *, CACHE *, int, ALPHABET *, 
+                                     Template2D *);
 uint64_t        GetPModelIdxCorr     (U8 *, CModel *, uint64_t);
 void            CorrectCModelSUBS    (CModel *, PModel *, uint8_t);
 PModel          *CreatePModel        (U32);

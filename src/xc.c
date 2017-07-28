@@ -36,6 +36,7 @@ refNModels, INF *I){
   FloatPModel *PT;
   CBUF        *symBuf = CreateCBuffer(BUFFER_SIZE, BGUARD);
   CACHE       *C = CreateCache(50, '\n');
+  Template2D  *T;
 
   if(P->verbose)
     fprintf(stderr, "Analyzing data and creating models ...\n");
@@ -128,6 +129,7 @@ refNModels, INF *I){
 
   I[id].header = _bytes_output;
 
+  int col = 0;
   while((k = fread(readerBuffer, 1, BUFFER_SIZE, Reader)))
     for(idxPos = 0 ; idxPos < k ; ++idxPos){
 
@@ -151,8 +153,16 @@ refNModels, INF *I){
       pos = &symBuf->buf[symBuf->idx-1];
       for(cModel = 0 ; cModel < P->nModels ; ++cModel){
         CModel *CM = cModels[cModel];
-        GetPModelIdx(pos, CM);
-        ComputePModel(CM, pModel[n], CM->pModelIdx, CM->alphaDen);
+
+        if(CM->vert == 0){
+          GetPModelIdx(pos, CM);
+          ComputePModel(CM, pModel[n], CM->pModelIdx, CM->alphaDen);
+          }
+        else{
+          GetPModelIdx2D(CM, C, col, AL, T);
+          ComputePModel(CM, pModel[n], CM->pModelIdx, CM->alphaDen);
+          }
+          
         ComputeWeightedFreqs(cModelWeight[n], pModel[n], PT, CM->nSym);
         if(CM->edits != 0){
           ++n;
