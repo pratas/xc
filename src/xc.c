@@ -28,7 +28,7 @@ refNModels, INF *I){
   FILE        *Writter = Fopen(name, "w");
   uint32_t    n, k, x, cModel, totModels, idxPos;
   int32_t     idx = 0;
-  uint64_t    i, size = 0;
+  uint64_t    i = 0, size = 0;
   double      *cModelWeight, cModelTotalWeight = 0;
   uint8_t     *readerBuffer, sym, irSym, *pos, type = 0, 
               header = 1, line = 0, dna = 0;
