@@ -218,7 +218,7 @@ refNModels, INF *I){
         }
 
       C->lines[0][col++] = readerBuffer[idxPos];
-      if(readerBuffer[idxPos] == C->splitter || readerBuffer[idxPos] == '\r'){
+      if(readerBuffer[idxPos] == C->splitter){
         UpdateCache(C);
         col = 0;
         }

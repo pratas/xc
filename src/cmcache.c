@@ -22,12 +22,15 @@ CACHE *CreateCache(uint32_t size, uint8_t splitter){
 //
 void UpdateCache(CACHE *C){
   uint32_t x, y; // TODO: USE MEMMOVE
+
   for(x = C->nLines-2 ; x >= 0 ; x--){
+
     for(y = 0 ; y < MAX_LINE_CACHE ; ++y){
       C->lines[x+1][y] = C->lines[x][y];  
-      if(C->lines[x+1][y] == '\n' || C->lines[x+1][y] == '\r')
+      if(C->lines[x][y] == C->splitter)
         break;
       }
+
     }
   }
 
