@@ -13,7 +13,10 @@
 #include "cmcache.h"
 #include "levels.h"
 #include "common.h"
+#include "pmodels.h"
 #include "cm.h"
+#include "mclass.h"
+#include "tolerant.h"
 #include "bitio.h"
 #include "arith.h"
 #include "arith_aux.h"
@@ -21,82 +24,56 @@
 //////////////////////////////////////////////////////////////////////////////
 // - - - - - - - - - - - - - - C O M P R E S S O R - - - - - - - - - - - - - -
 
-int Compress(Parameters *P, CModel **cModels, uint8_t id, uint32_t 
-refNModels, INF *I){
+int Compress(Parameters *P, uint8_t id, INF *I, MCLASS *MC){
   FILE        *Reader  = Fopen(P->tar[id], "r");
   char        *name    = concatenate(P->tar[id], ".co");
   FILE        *Writter = Fopen(name, "w");
-  uint32_t    n, k, x, cModel, totModels, idxPos;
-  int32_t     idx = 0;
+  uint32_t    n, k, x, model, idxPos;
   uint64_t    i = 0, size = 0;
-  double      *cModelWeight, cModelTotalWeight = 0;
-  uint8_t     *readerBuffer, sym, irSym, *pos, type = 0, 
-              header = 1, line = 0, dna = 0;
+  uint8_t     *readerBuffer, sym, *pos; 
   PModel      **pModel, *MX;
   FloatPModel *PT;
   CBUF        *symBuf = CreateCBuffer(BUFFER_SIZE, BGUARD);
-  CACHE       *C = CreateCache(20, '\n');
-  Template2D  *T;
+  CACHE       *CS = CreateCache(20, '\n');
+  CMWeight    *WM;
 
   if(P->verbose)
     fprintf(stderr, "Analyzing data and creating models ...\n");
 
-  #ifdef ESTIMATE
-  FILE *IAE = NULL;
-  char *IAEName = NULL;
-  if(P->estim == 1){
-    IAEName = concatenate(P->tar[id], ".iae");
-    IAE = Fopen(IAEName, "w");
-    }
-  #endif
-  
   _bytes_output = 0;
   size = NBytesInFile(Reader);
 
   // BUILD ALPHABET
   ALPHABET *AL = CreateAlphabet(P->low);
   LoadAlphabet(AL, Reader);
-  PrintAlphabet(AL);
+  //PrintAlphabet(AL);
 
   // ADAPT ALPHABET FOR NON FREQUENT SYMBOLS
   AdaptAlphabetNonFrequent(AL, Reader);
   
   // EXTRA MODELS DERIVED FROM EDITS
-  totModels = P->nModels;
-  for(n = 0 ; n < P->nModels ; ++n) 
+  MC->totalNPModels = MC->nModels;
+  for(n = 0 ; n < MC->nModels ; ++n) 
     if(P->model[n].edits != 0){
       #ifdef RUN_SUBS
-      totModels++;
+      MC->totalNPModels++;
       #endif
       }
 
-  uint32_t nTemplates = 0;
-  for(n = 0 ; n < P->nModels ; ++n)
-    if(P->model[n].vert == 1)
-      ++nTemplates;
+  PrintMClassInfo(MC);
 
-  T = (Template2D *) Calloc(nTemplates, sizeof(Template2D));
-  for(n = 0, cModel = 0 ; n < P->nModels ; ++n, ++cModel)
-    if(P->model[n].vert == 1)
-      T[cModel] = CreateCTemplate2D(P->model[n].ctx);
-
-  pModel        = (PModel  **) Calloc(totModels, sizeof(PModel *));
-  for(n = 0 ; n < totModels ; ++n)
+  pModel        = (PModel **) Calloc(MC->totalNPModels, sizeof(PModel *));
+  for(n = 0 ; n < MC->totalNPModels ; ++n)
     pModel[n]   = CreatePModel(AL->cardinality);
   MX            = CreatePModel(AL->cardinality);
   PT            = CreateFloatPModel(AL->cardinality);
+  WM            = CreateWeightModel(MC->totalNPModels);
   readerBuffer  = (uint8_t *) Calloc(BUFFER_SIZE, sizeof(uint8_t));
-  cModelWeight  = (double   *) Calloc(totModels, sizeof(double));
-  
-  for(n = 0 ; n < totModels ; ++n)
-    cModelWeight[n] = 1.0 / totModels;
 
-  for(n = 0 ; n < P->nModels ; ++n){
-    if(P->model[n].type == TARGET){
-      cModels[n] = CreateCModel(P->model[n].ctx, P->model[n].den, TARGET, 
-      P->model[n].edits, P->model[n].eDen, AL->cardinality, P->model[n].vert);
-      }
-    }
+  for(n = MC->refNModels ; n < MC->nModels ; ++n)
+    MC->CM[n] = CreateCModel(P->model[n].ctx, P->model[n].den, TARGET, 
+                P->model[n].edits, P->model[n].eDen, AL->cardinality, 
+                P->model[n].vert);
 
   if(P->verbose){
     fprintf(stderr, "Done!\n");
@@ -120,21 +97,21 @@ refNModels, INF *I){
 
   // REMAP ALPHABET
   // ResetAlphabet(AL);
-  PrintAlphabet(AL);
+  // PrintAlphabet(AL);
 
   WriteNBits(AL->cardinality,          16, Writter);
   for(x = 0 ; x < AL->cardinality ; ++x)
     WriteNBits(AL->toChars[x],          8, Writter);
   WriteNBits((int) (P->gamma * 65536), 32, Writter);
-  WriteNBits(C->nLines,                16, Writter);
-  WriteNBits(P->nModels,               16, Writter);
-  for(n = 0 ; n < P->nModels ; ++n){
-    WriteNBits(cModels[n]->ctx,        16, Writter);
-    WriteNBits(cModels[n]->alphaDen,   16, Writter);
-    WriteNBits(cModels[n]->edits,       8, Writter);
-    WriteNBits(cModels[n]->SUBS.eDen,  32, Writter);
-    WriteNBits(P->model[n].type,        1, Writter);
-    WriteNBits(P->model[n].vert,        1, Writter);
+  WriteNBits(CS->nLines,               16, Writter);
+  WriteNBits(MC->nModels,              16, Writter);
+  for(n = 0 ; n < MC->nModels ; ++n){
+    WriteNBits(MC->CM[n]->ctx,         16, Writter);
+    WriteNBits(MC->CM[n]->alphaDen,    16, Writter);
+    WriteNBits(MC->CM[n]->edits,        8, Writter);
+    //WriteNBits(MC->CM[n]->TM->den,    32, Writter);
+    WriteNBits(MC->CM[n]->ref,          1, Writter);
+    WriteNBits(MC->CM[n]->vert,         1, Writter);
     }
 
   I[id].header = _bytes_output;
@@ -144,85 +121,54 @@ refNModels, INF *I){
     for(idxPos = 0 ; idxPos < k ; ++idxPos){
 
       CalcProgress(size, ++i);
-      
-      /*
-      if(IsLowChar(AL, readerBuffer[idxPos]) == 1){
-        WriteNBits(1, log2(AL->nLow), Writter);
-        #ifdef ESTIMATE
-        if(P->estim != 0)
-          fprintf(IAE, "%.3g\n", log2(AL->cardinality));
-        #endif
-        continue;
-        }
-      */
 
       symBuf->buf[symBuf->idx] = sym = AL->revMap[ readerBuffer[idxPos] ];
       memset((void *)PT->freqs, 0, AL->cardinality * sizeof(double));
 
       n = 0;
       pos = &symBuf->buf[symBuf->idx-1];
-      for(cModel = 0 ; cModel < P->nModels ; ++cModel){
-        CModel *CM = cModels[cModel];
+      for(model = 0 ; model < MC->nModels ; ++model){
+        CModel *CM = MC->CM[model];
 
         if(CM->vert == 0){
-          GetPModelIdx(pos, CM);
-          ComputePModel(CM, pModel[n], CM->pModelIdx, CM->alphaDen);
+          GetCModelIdx(pos, CM);
           }
         else{
-          GetPModelIdx2D(CM, C, col, AL, T);
-          ComputePModel(CM, pModel[n], CM->pModelIdx, CM->alphaDen);
+          //GetCModelIdx2D(CM, CS, col, AL, T);
           }
           
-        ComputeWeightedFreqs(cModelWeight[n], pModel[n], PT, CM->nSym);
+        ComputePModel(CM, pModel[n], CM->idx, CM->alphaDen);
+        ComputeWeightedFreqs(WM->weight[n], pModel[n], PT, CM->nSym);
+ 
         if(CM->edits != 0){
           ++n;
-          CM->SUBS.seq->buf[CM->SUBS.seq->idx] = sym;
-          CM->SUBS.idx = GetPModelIdxCorr(CM->SUBS.seq->buf+
-          CM->SUBS.seq->idx-1, CM, CM->SUBS.idx);
-          ComputePModel(CM, pModel[n], CM->SUBS.idx, CM->SUBS.eDen);
-          ComputeWeightedFreqs(cModelWeight[n], pModel[n], PT, CM->nSym);
+          CM->TM->seq->buf[CM->TM->seq->idx] = sym;
+          CM->TM->idx = GetCModelIdxCorr(CM->TM->seq->buf+
+          CM->TM->seq->idx-1, CM, CM->TM->idx);
+
+          ComputePModel(CM, pModel[n], CM->TM->idx, CM->TM->den);
+          ComputeWeightedFreqs(WM->weight[n], pModel[n], PT, CM->nSym);
           }
         ++n;
         }
 
-      MX->sum = 0;
-      for(x = 0 ; x < AL->cardinality ; ++x){
-        MX->sum += MX->freqs[x] = 1 + (unsigned) (PT->freqs[x] * MX_PMODEL);
-        }
-
+      ComputeMXProbs(PT, MX, AL->cardinality);
       AESym(sym, (int *)(MX->freqs), (int) MX->sum, Writter);
-      #ifdef ESTIMATE
-      if(P->estim != 0)
-        fprintf(IAE, "%.3g\n", PModelSymbolNats(MX, sym) / M_LN2);
-      #endif
+      CalcDecayment(WM, pModel, sym, P->gamma);
 
-      cModelTotalWeight = 0;
-      for(n = 0 ; n < totModels ; ++n){
-        cModelWeight[n] = Power(cModelWeight[n], P->gamma) * (double) 
-        pModel[n]->freqs[sym] / pModel[n]->sum;
-        cModelTotalWeight += cModelWeight[n];
-        }
+      for(n = MC->refNModels ; n < MC->nModels ; ++n)
+        UpdateCModelCounter(MC->CM[n], sym, MC->CM[n]->idx);
 
-      for(n = 0 ; n < P->nModels ; ++n)
-        if(cModels[n]->ref == TARGET)
-          UpdateCModelCounter(cModels[n], sym, cModels[n]->pModelIdx);
-
-      for(n = 0 ; n < totModels ; ++n)
-        cModelWeight[n] /= cModelTotalWeight; // RENORMALIZE THE WEIGHTS
+      RenormalizeWeights(WM);
 
       n = 0;
-      for(cModel = 0 ; cModel < P->nModels ; ++cModel){
-        if(cModels[cModel]->edits != 0)
-          CorrectCModelSUBS(cModels[cModel], pModel[++n], sym);
+      for(model = 0 ; model < MC->nModels ; ++model){
+        if(MC->CM[model]->edits != 0)
+          UpdateTolerantModel(MC->CM[model]->TM, pModel[++n], sym);
         ++n;
         }
 
-      C->lines[0][col++] = readerBuffer[idxPos];
-      if(readerBuffer[idxPos] == C->splitter){
-        UpdateCache(C);
-        col = 0;
-        }
-
+      col = UpdateCache(CS, readerBuffer[idxPos], col);
       UpdateCBuffer(symBuf);
       }
 
@@ -230,59 +176,48 @@ refNModels, INF *I){
   doneoutputtingbits(Writter);
   fclose(Writter);
 
-
-  #ifdef ESTIMATE
-  if(P->estim == 1){
-    fclose(IAE);
-    Free(IAEName);
-    }
-  #endif
-
-  Free(MX);
   Free(name);
-  Free(cModelWeight);
-  for(n = 0 ; n < P->nModels ; ++n)
-    if(P->model[n].type == REFERENCE)
-      ResetCModelIdx(cModels[n]);
-    else
-      FreeCModel(cModels[n]);
-  for(n = 0 ; n < totModels ; ++n){
-    Free(pModel[n]->freqs);
-    Free(pModel[n]);
-    }
-  Free(pModel);
-  Free(PT);
   Free(readerBuffer);
+
+  for(n = 0 ; n < MC->refNModels ; ++n)
+    ResetCModelIdx(MC->CM[n]);
+
+  for(n = MC->refNModels ; n < MC->nModels ; ++n)
+    RemoveCModel(MC->CM[n]);
+
+  for(n = 0 ; n < MC->totalNPModels ; ++n)
+    RemovePModel(pModel[n]);
+  Free(pModel);
+
+  RemovePModel(MX);
+  RemoveWeightModel(WM);
+  RemoveFPModel(PT);
   RemoveCBuffer(symBuf);
-  RemoveAlphabet(AL);
-  RemoveCache(C);
+  RemoveCache(CS);
 
   fclose(Reader);
+  int cardinality = AL->cardinality;
+  RemoveAlphabet(AL);
 
   if(P->verbose == 1)
     fprintf(stderr, "Done!                          \n");  // SPACES ARE VALID 
 
   I[id].bytes = _bytes_output;
   I[id].size  = i;
-  return AL-> cardinality;
+
+  return cardinality;
   }
 
 
 //////////////////////////////////////////////////////////////////////////////
 // - - - - - - - - - - - - - - - - R E F E R E N C E - - - - - - - - - - - - -
 
-CModel **LoadReference(Parameters *P){
+void LoadReference(Parameters *P, MCLASS *MC){
   FILE      *Reader = Fopen(P->ref, "r");
   uint32_t  n, k, idxPos;
-  uint64_t  nSymbols = 0;
-  int32_t   idx = 0;
+  uint64_t  nSymbols = 0, i = 0;
   uint8_t   *readerBuffer, sym;
   CBUF      *symBuf = CreateCBuffer(BUFFER_SIZE, BGUARD);
-  CModel    **cModels;
-  
-  #ifdef PROGRESS
-  uint64_t  i = 0;
-  #endif
 
   if(P->verbose == 1)
     fprintf(stdout, "Building reference model ...\n");
@@ -293,11 +228,10 @@ CModel **LoadReference(Parameters *P){
   PrintAlphabet(AL);
 
   readerBuffer  = (uint8_t *) Calloc(BUFFER_SIZE + 1, sizeof(uint8_t));
-  cModels       = (CModel **) Malloc(P->nModels * sizeof(CModel *)); 
-  for(n = 0 ; n < P->nModels ; ++n)
-    if(P->model[n].type == REFERENCE)
-      cModels[n] = CreateCModel(P->model[n].ctx, P->model[n].den, REFERENCE, 
-      P->model[n].edits, P->model[n].eDen, AL->cardinality, P->model[n].vert);
+  for(n = 0 ; n < MC->refNModels ; ++n)
+    MC->CM[n] = CreateCModel(P->model[n].ctx, P->model[n].den, REFERENCE, 
+                P->model[n].edits, P->model[n].eDen, AL->cardinality, 
+                P->model[n].vert);
 
   nSymbols = NBytesInFile(Reader);
 
@@ -308,23 +242,18 @@ CModel **LoadReference(Parameters *P){
       symBuf->buf[symBuf->idx] = sym = AL->revMap[ readerBuffer[idxPos] ];
       P->checksum = (P->checksum + (uint8_t) sym);
 
-      for(n = 0 ; n < P->nModels ; ++n)
-        if(P->model[n].type == REFERENCE){
-          GetPModelIdx(symBuf->buf+symBuf->idx-1, cModels[n]);
-          UpdateCModelCounter(cModels[n], sym, cModels[n]->pModelIdx);
-          }
+      for(n = 0 ; n < MC->refNModels ; ++n){
+        GetCModelIdx(symBuf->buf+symBuf->idx-1, MC->CM[n]);
+        UpdateCModelCounter(MC->CM[n], sym, MC->CM[n]->idx);
+        }
 
       UpdateCBuffer(symBuf);
-
-      #ifdef PROGRESS
       CalcProgress(nSymbols, ++i);
-      #endif
       }
  
   P->checksum %= CHECKSUMGF; 
-  for(n = 0 ; n < P->nModels ; ++n)
-    if(P->model[n].type == REFERENCE)
-      ResetCModelIdx(cModels[n]);
+  for(n = 0 ; n < MC->refNModels ; ++n)
+    ResetCModelIdx(MC->CM[n]);
   Free(readerBuffer);
   RemoveCBuffer(symBuf);
   RemoveAlphabet(AL);
@@ -334,8 +263,6 @@ CModel **LoadReference(Parameters *P){
     fprintf(stdout, "Done!                          \n");  // SPACES ARE VALID  
   else
     fprintf(stdout, "                               \n");  // SPACES ARE VALID
-
-  return cModels;
   }
   
 //////////////////////////////////////////////////////////////////////////////
@@ -345,13 +272,12 @@ CModel **LoadReference(Parameters *P){
 
 int32_t main(int argc, char *argv[]){
   char        **p = *&argv, **xargv, *xpl = NULL;
-  CModel      **refModels;
   int32_t     xargc = 0, cardinality = 1;
-  uint32_t    n, k, refNModels, tarNModels, horizontalNModels, verticalNModels;
+  uint32_t    n, k;
   uint64_t    totalBytes, headerBytes, totalSize;
   clock_t     stop = 0, start = clock();
   double      gamma;
-  
+  MCLASS      *MC;
   Parameters  *P;
   INF         *I;
 
@@ -402,23 +328,18 @@ int32_t main(int argc, char *argv[]){
 
   P->model = (ModelPar *) Calloc(P->nModels, sizeof(ModelPar));
 
-  k = 0;
-  refNModels = 0;
-  tarNModels = 0;
-  horizontalNModels = 0;
-  verticalNModels = 0;
+  MC = CreateMClass(P->nModels);
 
+  k = 0;
   // LOAD REFERENCE MODELS FROM ARGS
   for(n = 1 ; n < argc ; ++n){
     if(strcmp(argv[n], "-rhm") == 0){
       P->model[k++] = ArgsUniqModel(argv[n+1], 1, 0);
-      ++refNModels;
-      ++horizontalNModels;
+      MC->refNModels++;
       }
     if(strcmp(argv[n], "-rvm") == 0){
       P->model[k++] = ArgsUniqModel(argv[n+1], 1, 1);
-      ++refNModels;
-      ++verticalNModels;
+      MC->refNModels++;
       }
     }
 
@@ -427,13 +348,11 @@ int32_t main(int argc, char *argv[]){
     for(n = 1 ; n < xargc ; ++n){
       if(strcmp(xargv[n], "-rhm") == 0){
         P->model[k++] = ArgsUniqModel(xargv[n+1], 1, 0);
-        ++refNModels;
-        ++horizontalNModels;
+        MC->refNModels++;
         }
       if(strcmp(xargv[n], "-rvm") == 0){
         P->model[k++] = ArgsUniqModel(xargv[n+1], 1, 1);
-        ++refNModels;
-        ++verticalNModels;
+        MC->refNModels++;
         }
       }
     }
@@ -442,13 +361,11 @@ int32_t main(int argc, char *argv[]){
   for(n = 1 ; n < argc ; ++n){
     if(strcmp(argv[n], "-thm") == 0){
       P->model[k++] = ArgsUniqModel(argv[n+1], 0, 0);
-      ++tarNModels;
-      ++horizontalNModels;
+      MC->tarNModels++;
       }
     if(strcmp(argv[n], "-tvm") == 0){
       P->model[k++] = ArgsUniqModel(argv[n+1], 0, 1);
-      ++tarNModels;
-      ++verticalNModels;
+      MC->tarNModels++;
       }
     }
 
@@ -457,13 +374,11 @@ int32_t main(int argc, char *argv[]){
     for(n = 1 ; n < xargc ; ++n){
       if(strcmp(xargv[n], "-thm") == 0){
         P->model[k++] = ArgsUniqModel(xargv[n+1], 0, 0);
-        ++tarNModels;
-        ++horizontalNModels;
+        MC->tarNModels++;
         }
       if(strcmp(xargv[n], "-tvm") == 0){
         P->model[k++] = ArgsUniqModel(xargv[n+1], 0, 1);
-        ++tarNModels;
-        ++verticalNModels;
+        MC->tarNModels++;
         }
       }
     } 
@@ -481,15 +396,13 @@ int32_t main(int argc, char *argv[]){
   if(P->verbose) 
     PrintArgs(P);
 
-  if(refNModels == 0)
-    refModels = (CModel **) Malloc(P->nModels * sizeof(CModel *));
-  else{
+  if(MC->refNModels != 0){
     if(P->ref == NULL){
       fprintf(stderr, "Error: using reference model(s) in nonexistent "
       "reference sequence!\n");
       exit(1);
       }
-    refModels = LoadReference(P);
+    LoadReference(P, MC);
     if(P->verbose)
       fprintf(stderr, "Checksum: %"PRIu64"\n", P->checksum);
     }
@@ -500,7 +413,7 @@ int32_t main(int argc, char *argv[]){
   totalBytes  = 0;
   headerBytes = 0;
   for(n = 0 ; n < P->nTar ; ++n){
-    cardinality = Compress(P, refModels, n, refNModels, I);
+    cardinality = Compress(P, n, I, MC);
     totalSize   += I[n].size;
     totalBytes  += I[n].bytes;
     headerBytes += I[n].header;
@@ -523,6 +436,8 @@ int32_t main(int argc, char *argv[]){
   /totalSize), (8.0*totalBytes)/(log2(cardinality)*totalSize));  
   stop = clock();
   fprintf(stdout, "Spent %g sec.\n", ((double)(stop-start))/CLOCKS_PER_SEC);
+
+  RemoveMClass(MC);
 
   return EXIT_SUCCESS;
   }

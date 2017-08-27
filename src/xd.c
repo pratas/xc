@@ -12,6 +12,7 @@
 #include "alphabet.h"
 #include "cmcache.h"
 #include "common.h"
+#include "pmodels.h"
 #include "cm.h"
 #include "bitio.h"
 #include "arith.h"
@@ -24,10 +25,10 @@ void Decompress(Parameters *P, CModel **cModels, uint8_t id){
   FILE        *Reader  = Fopen(P->tar[id], "r");
   char        *name    = ReplaceSubStr(P->tar[id], ".co", ".de"); 
   FILE        *Writter = Fopen(name, "w");
-  uint64_t    nSymbols = 0;
+  int64_t     nSymbols = 0;
   uint32_t    n, k, x, cModel, totModels;
   double      *cModelWeight, cModelTotalWeight = 0;
-  int32_t     idx = 0, idxOut = 0, nCacheLines;
+  int32_t     idxOut = 0, nCacheLines;
   uint8_t     *outBuffer, sym = 0, *pos;
   CBUF        *symBuf = CreateCBuffer(BUFFER_SIZE, BGUARD);
   PModel      **pModel, *MX;
@@ -106,7 +107,7 @@ void Decompress(Parameters *P, CModel **cModels, uint8_t id){
     pos = &symBuf->buf[symBuf->idx-1];
     for(cModel = 0 ; cModel < P[id].nModels ; ++cModel){
       GetPModelIdx(pos, cModels[cModel]);
-      ComputePModel(cModels[cModel], pModel[n], cModels[cModel]->pModelIdx,
+      ComputePModel(cModels[cModel], pModel[n], cModels[cModel]->idx,
       cModels[cModel]->alphaDen);
       ComputeWeightedFreqs(cModelWeight[n], pModel[n], PT, AL->cardinality);
       if(cModels[cModel]->edits != 0){ // SUBSTITUTIONAL HANDLING
@@ -144,7 +145,7 @@ void Decompress(Parameters *P, CModel **cModels, uint8_t id){
 
     for(n = 0 ; n < P[id].nModels ; ++n){
       if(P[id].model[n].type == TARGET)
-        UpdateCModelCounter(cModels[n], sym, cModels[n]->pModelIdx);
+        UpdateCModelCounter(cModels[n], sym, cModels[n]->idx);
       }
 
     for(n = 0 ; n < totModels ; ++n)
@@ -205,7 +206,6 @@ CModel **LoadReference(Parameters *P){
   FILE      *Reader = Fopen(P->ref, "r");
   uint32_t  n, k, idxPos;
   uint64_t  nSymbols = 0;
-  int32_t   idx = 0;
   uint8_t   *readerBuffer, sym;
   CBUF      *symBuf = CreateCBuffer(BUFFER_SIZE, BGUARD);
   CModel    **cModels;
@@ -239,7 +239,7 @@ CModel **LoadReference(Parameters *P){
       for(n = 0 ; n < P->nModels ; ++n)
         if(P->model[n].type == REFERENCE){
           GetPModelIdx(symBuf->buf+symBuf->idx-1, cModels[n]);
-          UpdateCModelCounter(cModels[n], sym, cModels[n]->pModelIdx);
+          UpdateCModelCounter(cModels[n], sym, cModels[n]->idx);
           }
 
       UpdateCBuffer(symBuf);

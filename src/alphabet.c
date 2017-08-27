@@ -29,8 +29,8 @@ ALPHABET *CreateAlphabet(uint32_t low){
   A->revMap          = (uint8_t  *) Calloc(ALPHABET_MAX_SIZE, sizeof(uint8_t));
   A->alphabet        = (uint8_t  *) Calloc(ALPHABET_MAX_SIZE, sizeof(uint8_t));
   A->mask            = (uint8_t  *) Calloc(ALPHABET_MAX_SIZE, sizeof(uint8_t));
-  A->lowAlpha        = (uint8_t  *) Calloc(ALPHABET_MAX_SIZE, sizeof(uint8_t));
   A->counts          = (uint64_t *) Calloc(ALPHABET_MAX_SIZE, sizeof(uint64_t));
+  A->lowAlpha        = (uint8_t  *) Calloc(ALPHABET_MAX_SIZE, sizeof(uint8_t));
   A->low             = low;
   A->nLow            = 0;
   A->length          = 0;
@@ -108,7 +108,7 @@ void PrintAlphabet(ALPHABET *A){
 // ADAPT ALPHABET
 //
 void AdaptAlphabetNonFrequent(ALPHABET *A, FILE *F){
-  uint32_t x, y;
+  uint32_t x;
 
   for(x = 0 ; x < A->cardinality ; ++x){
     int id = (int) A->toChars[x];
@@ -118,6 +118,7 @@ void AdaptAlphabetNonFrequent(ALPHABET *A, FILE *F){
       }
     }
 
+/*
   fprintf(stderr, "\nLow symbols numb : %u\n", A->nLow);
   fprintf(stderr, "Low frequent sym : \n");
   for(x = 0 ; x < A->cardinality ; ++x){
@@ -126,6 +127,7 @@ void AdaptAlphabetNonFrequent(ALPHABET *A, FILE *F){
       PrintID(A, id);
       }
     }
+*/
   }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -137,8 +139,8 @@ void RemoveAlphabet(ALPHABET *A){
   Free(A->revMap);
   Free(A->alphabet);
   Free(A->mask);
-  if(A->nLow > 0)
-    Free(A->lowAlpha);
+  Free(A->counts);
+  Free(A->lowAlpha);
   Free(A);
   }
 

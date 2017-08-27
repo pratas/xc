@@ -20,18 +20,22 @@ CACHE *CreateCache(uint32_t size, uint8_t splitter){
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 // UPDATE CACHE
 //
-void UpdateCache(CACHE *C){
-  uint32_t x, y; // TODO: USE MEMMOVE
+uint32_t UpdateCache(CACHE *C, uint8_t sym, uint32_t col){
 
-  for(x = C->nLines-2 ; x >= 0 ; x--){
-
-    for(y = 0 ; y < MAX_LINE_CACHE ; ++y){
-      C->lines[x+1][y] = C->lines[x][y];  
-      if(C->lines[x][y] == C->splitter)
-        break;
+  C->lines[0][col++] = sym;
+  if(sym == C->splitter){
+    int32_t x, y; // TODO: USE MEMMOVE
+    for(x = C->nLines-2 ; x >= 0 ; x--){
+      for(y = 0 ; y < MAX_LINE_CACHE ; ++y){
+        C->lines[x+1][y] = C->lines[x][y]; 
+        if(C->lines[x][y] == C->splitter)
+          break;
+        }
       }
-
+    col = 0;
     }
+
+  return col;
   }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
