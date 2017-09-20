@@ -12,7 +12,7 @@ CACHE *CreateCache(uint32_t size, uint8_t splitter){
   C->nLines     = size;
   C->splitter   = splitter;
   for(x = 0 ; x < C->nLines ; ++x){
-    C->lines[x] = (uint8_t  *) Calloc(MAX_LINE_CACHE, sizeof(uint8_t));
+    C->lines[x] = (uint8_t  *) Calloc(MAX_LINE_CACHE+ LF_GD, sizeof(uint8_t));
     }
   return C;
   }
@@ -22,13 +22,13 @@ CACHE *CreateCache(uint32_t size, uint8_t splitter){
 //
 uint32_t UpdateCache(CACHE *C, uint8_t sym, uint32_t col){
 
-  C->lines[0][col++] = sym;
+  C->lines[0][LF_GD + col++] = sym;
   if(sym == C->splitter){
     int32_t x, y; // TODO: USE MEMMOVE
     for(x = C->nLines-2 ; x >= 0 ; x--){
       for(y = 0 ; y < MAX_LINE_CACHE ; ++y){
-        C->lines[x+1][y] = C->lines[x][y]; 
-        if(C->lines[x][y] == C->splitter)
+        C->lines[x+1][LF_GD + y] = C->lines[x][LF_GD + y]; 
+        if(C->lines[x][LF_GD + y] == C->splitter)
           break;
         }
       }

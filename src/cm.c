@@ -73,13 +73,14 @@ uint64_t GetCModelIdx2D(CModel *M, CACHE *C, int col, ALPHABET *A){
   int x;
   uint64_t idx = 0, prod = 1;
 
+/*
   fprintf(stderr, "col: %d\n", col);
   fprintf(stderr, "M->VM.size: %d\n", M->VM.size);
   fprintf(stderr, "M->VM.position[0].row: %d\n", M->VM.position[0].row);
   fprintf(stderr, "M->VM.position[0].col: %d\n", M->VM.position[0].col);
   fprintf(stderr, "M->VM.position[1].row: %d\n", M->VM.position[1].row);
   fprintf(stderr, "M->VM.position[1].col: %d\n", M->VM.position[1].col);
-  
+*/
 
   for(x = 0 ; x < M->VM.size ; ++x){
     idx += A->alphabet[C->lines[ M->VM.position[x].row + 1  ]

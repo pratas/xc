@@ -3,7 +3,8 @@
 
 #include "defs.h"
 
-#define MAX_LINE_CACHE 65535
+#define MAX_LINE_CACHE   65535
+#define LF_GD            20
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
