@@ -15,16 +15,16 @@ uint32_t eDen, uint32_t nSym, uint8_t vert){
 
   uint64_t prod = 1, *mult, n;
 
-  CModel      *M = (CModel *) Calloc(1, sizeof(CModel));
-  M->nSym        = nSym;
-  M->nPModels    = (uint64_t) pow(M->nSym, ctx);
-  mult           = (uint64_t *) Calloc(ctx, sizeof(uint64_t));
-  M->ctx         = ctx;
-  M->alphaDen    = aDen;
-  M->edits       = edits;
-  M->vert        = vert;
-  M->idx         = 0;
-  M->ref         = ref == 0 ? 0 : 1;
+  CModel     *M = (CModel *) Calloc(1, sizeof(CModel));
+  M->nSym       = nSym;
+  M->nPModels   = (uint64_t) pow(M->nSym, ctx);
+  mult          = (uint64_t *) Calloc(ctx, sizeof(uint64_t));
+  M->ctx        = ctx;
+  M->alphaDen   = aDen;
+  M->edits      = edits;
+  M->vert       = vert;
+  M->idx        = 0;
+  M->ref        = ref == 0 ? 0 : 1;
 
   if((ULL)(M->nPModels) * M->nSym * sizeof(ACC) >> 20 > MAX_ARRAY_MEMORY){
     M->mode     = HASH_TABLE_MODE;
@@ -69,14 +69,21 @@ void GetCModelIdx(U8 *p, CModel *M){
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-uint64_t GetCModelIdx2D(CModel *M, CACHE *C, int col, ALPHABET *A, 
-TEMPLATE2D *T){
-  int n;
+uint64_t GetCModelIdx2D(CModel *M, CACHE *C, int col, ALPHABET *A){
+  int x;
   uint64_t idx = 0, prod = 1;
 
-  for(n = 0 ; n < T->size ; ++n){
-    idx += A->alphabet[C->lines[ T->position[n].row + 1  ]
-                               [ T->position[n].col + col] ] * prod;
+  fprintf(stderr, "col: %d\n", col);
+  fprintf(stderr, "M->VM.size: %d\n", M->VM.size);
+  fprintf(stderr, "M->VM.position[0].row: %d\n", M->VM.position[0].row);
+  fprintf(stderr, "M->VM.position[0].col: %d\n", M->VM.position[0].col);
+  fprintf(stderr, "M->VM.position[1].row: %d\n", M->VM.position[1].row);
+  fprintf(stderr, "M->VM.position[1].col: %d\n", M->VM.position[1].col);
+  
+
+  for(x = 0 ; x < M->VM.size ; ++x){
+    idx += A->alphabet[C->lines[ M->VM.position[x].row + 1  ]
+                               [ M->VM.position[x].col + col] ] * prod;
     prod *= A->cardinality;
     }
 

@@ -34,7 +34,7 @@ int Compress(Parameters *P, uint8_t id, INF *I, MCLASS *MC){
   PModel      **pModel, *MX;
   FloatPModel *PT;
   CBUF        *symBuf = CreateCBuffer(BUFFER_SIZE, BGUARD);
-  CACHE       *CS = CreateCache(20, '\n');
+  CACHE       *CS = CreateCache(50, '\n');
   CMWeight    *WM;
 
   if(P->verbose)
@@ -134,7 +134,7 @@ int Compress(Parameters *P, uint8_t id, INF *I, MCLASS *MC){
           GetCModelIdx(pos, CM);
           }
         else{
-          //GetCModelIdx2D(CM, CS, col, AL, T);
+          GetCModelIdx2D(CM, CS, col, AL);
           }
           
         ComputePModel(CM, pModel[n], CM->idx, CM->alphaDen);
