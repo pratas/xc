@@ -12,13 +12,14 @@ typedef struct {
   uint8_t    **lines;          
   uint32_t   nLines;
   uint8_t    splitter;
+  int64_t    idx;
   }
 CACHE;
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 CACHE      *CreateCache            (uint32_t, uint8_t);
-uint32_t   UpdateCache             (CACHE *, uint8_t, uint32_t);
+void       UpdateCache             (CACHE *, uint8_t);
 void       RemoveCache             (CACHE *);
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -

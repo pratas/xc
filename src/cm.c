@@ -16,13 +16,22 @@ uint32_t eDen, uint32_t nSym, uint8_t vert){
   uint64_t prod = 1, *mult, n;
 
   CModel     *M = (CModel *) Calloc(1, sizeof(CModel));
+
+  M->vert       = vert;
+  if(M->vert != 0){
+    M->VM       = CreateCTemplate2D(ctx);
+    M->ctx      = M->VM.size;
+    //PrintCTemplate2D(M->VM);
+    }
+  else{
+    M->ctx      = ctx;
+    }
+
   M->nSym       = nSym;
-  M->nPModels   = (uint64_t) pow(M->nSym, ctx);
-  mult          = (uint64_t *) Calloc(ctx, sizeof(uint64_t));
-  M->ctx        = ctx;
+  M->nPModels   = (uint64_t) pow(M->nSym, M->ctx);
+  mult          = (uint64_t *) Calloc(M->ctx, sizeof(uint64_t));
   M->alphaDen   = aDen;
   M->edits      = edits;
-  M->vert       = vert;
   M->idx        = 0;
   M->ref        = ref == 0 ? 0 : 1;
 
@@ -35,11 +44,6 @@ uint32_t eDen, uint32_t nSym, uint8_t vert){
     M->AT       = CreateArrayTable(M->nSym, M->nPModels);
     }
 
-  if(M->vert != 0){
-    M->VM       = CreateCTemplate2D(M->ctx);
-    //PrintCTemplate2D(M->VM);
-    }
-
   for(n = 0 ; n < M->ctx ; ++n){
     mult[n] = prod;
     prod *= M->nSym;
@@ -48,7 +52,7 @@ uint32_t eDen, uint32_t nSym, uint8_t vert){
   M->multiplier = mult[M->ctx-1];
 
   if(M->edits != 0){
-    M->TM = CreateTolerantModel(edits, eDen, ctx, nSym);
+    M->TM = CreateTolerantModel(edits, eDen, M->ctx, nSym);
     }
 
   Free(mult);
@@ -69,7 +73,7 @@ void GetCModelIdx(U8 *p, CModel *M){
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-uint64_t GetCModelIdx2D(CModel *M, CACHE *C, int col, ALPHABET *A){
+uint64_t GetCModelIdx2D(CModel *M, CACHE *C, ALPHABET *A){
   int x;
   uint64_t idx = 0, prod = 1;
 
@@ -83,8 +87,14 @@ uint64_t GetCModelIdx2D(CModel *M, CACHE *C, int col, ALPHABET *A){
 */
 
   for(x = 0 ; x < M->VM.size ; ++x){
+/*
     idx += A->alphabet[C->lines[ M->VM.position[x].row + 1  ]
-                               [ M->VM.position[x].col + col] ] * prod;
+                               [ M->VM.position[x].col + C->idx - 1] ] * prod;
+*/
+
+    idx += C->lines[M->VM.position[x].row + 1]
+                   [M->VM.position[x].col + C->idx] * prod;
+
     prod *= A->cardinality;
     }
 

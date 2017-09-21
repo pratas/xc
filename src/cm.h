@@ -37,7 +37,7 @@ CModel;
 CModel          *CreateCModel        (uint32_t, uint32_t, uint8_t, uint32_t, 
                                       uint32_t, uint32_t, uint8_t);
 void            GetCModelIdx         (uint8_t *, CModel *);
-uint64_t        GetCModelIdx2D       (CModel *, CACHE *, int, ALPHABET *);
+uint64_t        GetCModelIdx2D       (CModel *, CACHE *, ALPHABET *);
 uint64_t        GetCModelIdxCorr     (uint8_t *, CModel *, uint64_t);
 void            ResetCModelIdx       (CModel *);
 void            UpdateCModelCounter  (CModel *, uint32_t, uint64_t);

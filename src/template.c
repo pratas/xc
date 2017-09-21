@@ -10,20 +10,20 @@
 //            1
 //            X  
 //
-static COORDS template0[] = {{-1, 0}};
+static COORDS template1[] = {{-1, 0}};
 
 //
 //          1  
 //            X  
 //
-static COORDS template1[] = {{-1, -1}};
+static COORDS template2[] = {{-1, -1}};
 
 //
 //            2
 //            1
 //            X
 //
-static COORDS template2[] = {{-1, 0}, {-2, 0}};
+static COORDS template3[] = {{-1, 0}, {-2, 0}};
 
 //
 //            3
@@ -31,7 +31,7 @@ static COORDS template2[] = {{-1, 0}, {-2, 0}};
 //            1
 //            X
 //
-static COORDS template3[] = {{-1, 0}, {-2, 0}, {-3, 0}};
+static COORDS template4[] = {{-1, 0}, {-2, 0}, {-3, 0}};
 
 //
 //            4
@@ -40,7 +40,7 @@ static COORDS template3[] = {{-1, 0}, {-2, 0}, {-3, 0}};
 //            1
 //            X
 //
-static COORDS template4[] = {{-1, 0}, {-2, 0}, {-3, 0}, {-4, 0}};
+static COORDS template5[] = {{-1, 0}, {-2, 0}, {-3, 0}, {-4, 0}};
 
 //
 //            5
@@ -50,7 +50,7 @@ static COORDS template4[] = {{-1, 0}, {-2, 0}, {-3, 0}, {-4, 0}};
 //            1
 //            X
 //
-static COORDS template5[] = {{-1, 0}, {-2, 0}, {-3, 0}, {-4, 0}, {-5, 0}};
+static COORDS template6[] = {{-1, 0}, {-2, 0}, {-3, 0}, {-4, 0}, {-5, 0}};
 
 //
 //            6
@@ -61,7 +61,7 @@ static COORDS template5[] = {{-1, 0}, {-2, 0}, {-3, 0}, {-4, 0}, {-5, 0}};
 //            1
 //            X
 //
-static COORDS template6[] = {{-1, 0}, {-2, 0}, {-3, 0}, {-4, 0}, {-5, 0}, {-6,0}};
+static COORDS template7[] = {{-1, 0}, {-2, 0}, {-3, 0}, {-4, 0}, {-5, 0}, {-6,0}};
 
 //
 //            7
@@ -73,7 +73,7 @@ static COORDS template6[] = {{-1, 0}, {-2, 0}, {-3, 0}, {-4, 0}, {-5, 0}, {-6,0}
 //            1
 //            X
 //
-static COORDS template7[] = {{-1, 0}, {-2, 0}, {-3, 0}, {-4, 0}, {-5, 0}, {-6,0}, {-7, 0}};
+static COORDS template8[] = {{-1, 0}, {-2, 0}, {-3, 0}, {-4, 0}, {-5, 0}, {-6,0}, {-7, 0}};
 
 //
 //            8
@@ -86,52 +86,52 @@ static COORDS template7[] = {{-1, 0}, {-2, 0}, {-3, 0}, {-4, 0}, {-5, 0}, {-6,0}
 //            1
 //            X
 //
-static COORDS template8[] = {{-1, 0}, {-2, 0}, {-3, 0}, {-4, 0}, {-5, 0}, {-6,0}, {-7, 0}, {-8, 0}};
+static COORDS template9[] = {{-1, 0}, {-2, 0}, {-3, 0}, {-4, 0}, {-5, 0}, {-6,0}, {-7, 0}, {-8, 0}};
 
 //
 //         2
 //         1  
 //            X
 //
-static COORDS template9[] = {{-1, -1}, {-1, -2}};
+static COORDS template10[] = {{-1, -1}, {-1, -2}};
 
 //
 //         
 //      2  1  
 //            X
 //
-static COORDS template10[] = {{-1, -1}, {-2, -1}};
+static COORDS template11[] = {{-1, -1}, {-2, -1}};
 
 //
 //         
 //               1  2
 //            X
 //
-static COORDS template11[] = {{1, -1}, {2, -1}};
+static COORDS template12[] = {{1, -1}, {2, -1}};
 
 //
 //            2
 //         1  X
 //
-static COORDS template12[] = {{0, -1}, {-1, 0}};
+static COORDS template13[] = {{0, -1}, {-1, 0}};
 
 //
 //         3  2
 //         1  X
 //
-static COORDS template13[] = {{0, -1}, {-1, 0}, {-1, -1}};
+static COORDS template14[] = {{0, -1}, {-1, 0}, {-1, -1}};
 
 //
 //         3  2  4
 //         1  X
 //
-static COORDS template14[] = {{0, -1}, {-1, 0}, {-1, -1}, {-1, 1}};
+static COORDS template15[] = {{0, -1}, {-1, 0}, {-1, -1}, {-1, 1}};
 
 //
 //         3  2  4
 //      5  1  X
 //
-static COORDS template15[] = {{0, -1}, {-1, 0}, {-1, -1}, {-1, 1}, {0, -2}};
+static COORDS template16[] = {{0, -1}, {-1, 0}, {-1, -1}, {-1, 1}, {0, -2}};
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -139,10 +139,6 @@ TEMPLATE2D CreateCTemplate2D(int id){
   TEMPLATE2D T;
 
   switch(id){
-    case 0:
-      T.position = template0;
-      T.size = sizeof(template0) / sizeof(template0[0]);
-    break;
     case 1:
       T.position = template1;
       T.size = sizeof(template1) / sizeof(template1[0]);
@@ -202,6 +198,10 @@ TEMPLATE2D CreateCTemplate2D(int id){
     case 15:
       T.position = template15;
       T.size = sizeof(template15) / sizeof(template15[0]);
+    break;
+    case 16:
+      T.position = template16;
+      T.size = sizeof(template16) / sizeof(template16[0]);
     break;
     default:
       fprintf(stderr, "Error: invalid template id\n");

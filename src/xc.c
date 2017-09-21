@@ -116,7 +116,7 @@ int Compress(Parameters *P, uint8_t id, INF *I, MCLASS *MC){
 
   I[id].header = _bytes_output;
 
-  uint32_t col = 0;
+  CS->idx = LF_GD;
   while((k = fread(readerBuffer, 1, BUFFER_SIZE, Reader)))
     for(idxPos = 0 ; idxPos < k ; ++idxPos){
 
@@ -134,7 +134,7 @@ int Compress(Parameters *P, uint8_t id, INF *I, MCLASS *MC){
           GetCModelIdx(pos, CM);
           }
         else{
-          GetCModelIdx2D(CM, CS, col, AL);
+          GetCModelIdx2D(CM, CS, AL);
           }
           
         ComputePModel(CM, pModel[n], CM->idx, CM->alphaDen);
@@ -168,7 +168,7 @@ int Compress(Parameters *P, uint8_t id, INF *I, MCLASS *MC){
         ++n;
         }
 
-      col = UpdateCache(CS, readerBuffer[idxPos], col);
+      UpdateCache(CS, sym /*readerBuffer[idxPos]*/);
       UpdateCBuffer(symBuf);
       }
 
@@ -176,6 +176,7 @@ int Compress(Parameters *P, uint8_t id, INF *I, MCLASS *MC){
   doneoutputtingbits(Writter);
   fclose(Writter);
 
+/*
   Free(name);
   Free(readerBuffer);
 
@@ -194,10 +195,10 @@ int Compress(Parameters *P, uint8_t id, INF *I, MCLASS *MC){
   RemoveFPModel(PT);
   RemoveCBuffer(symBuf);
   RemoveCache(CS);
-
+*/
   fclose(Reader);
   int cardinality = AL->cardinality;
-  RemoveAlphabet(AL);
+//  RemoveAlphabet(AL);
 
   if(P->verbose == 1)
     fprintf(stderr, "Done!                          \n");  // SPACES ARE VALID 
