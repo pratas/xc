@@ -1,4 +1,6 @@
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include "cmcache.h"
 #include "mem.h"
 
@@ -22,17 +24,22 @@ CACHE *CreateCache(uint32_t size, uint8_t splitter){
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 // UPDATE CACHE
 //
-void UpdateCache(CACHE *C, uint8_t sym){
+void UpdateCache(CACHE *C, uint8_t sym, uint8_t realSym){
 
   C->lines[0][C->idx++] = sym;
-  if(sym == C->splitter){
-    int32_t x, y; // TODO: USE MEMMOVE
+  if(realSym == C->splitter){
+    int32_t x;
     for(x = C->nLines-2 ; x >= 0 ; x--){
-      for(y = 0 ; y < MAX_LINE_CACHE ; ++y){
+      memcpy(C->lines[x+1], C->lines[x], MAX_LINE_CACHE + LF_GD);
+    
+/*      int32_t y;
+      for(y = LF_GD ; y < MAX_LINE_CACHE ; ++y){
         C->lines[x+1][y] = C->lines[x][y]; 
-        if(C->lines[x][y] == C->splitter)
-          break;
+        //if(C->lines[x][y] == C->splitter)
+        //  break;
         }
+*/
+      
       }
     C->idx = LF_GD;
     }

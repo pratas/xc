@@ -52,7 +52,7 @@ uint32_t eDen, uint32_t nSym, uint8_t vert){
   M->multiplier = mult[M->ctx-1];
 
   if(M->edits != 0){
-    M->TM = CreateTolerantModel(edits, eDen, M->ctx, nSym);
+    M->TM       = CreateTolerantModel(edits, eDen, M->ctx, nSym);
     }
 
   Free(mult);
@@ -74,27 +74,19 @@ void GetCModelIdx(U8 *p, CModel *M){
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 uint64_t GetCModelIdx2D(CModel *M, CACHE *C, ALPHABET *A){
-  int x;
+  int32_t x;
   uint64_t idx = 0, prod = 1;
 
-/*
-  fprintf(stderr, "col: %d\n", col);
-  fprintf(stderr, "M->VM.size: %d\n", M->VM.size);
-  fprintf(stderr, "M->VM.position[0].row: %d\n", M->VM.position[0].row);
-  fprintf(stderr, "M->VM.position[0].col: %d\n", M->VM.position[0].col);
-  fprintf(stderr, "M->VM.position[1].row: %d\n", M->VM.position[1].row);
-  fprintf(stderr, "M->VM.position[1].col: %d\n", M->VM.position[1].col);
-*/
+  //fprintf(stderr, "col: %d\n", C->idx);
+  //fprintf(stderr, "M->VM.size: %d\n", M->VM.size);
+  //for(x = 0 ; x < M->VM.size ; ++x){
+  //  fprintf(stderr, "M->VM.position[%d].row: %d\n", x, M->VM.position[x].row);
+  //  fprintf(stderr, "M->VM.position[%d].col: %d\n", x, M->VM.position[x].col);
+  //    }
 
-  for(x = 0 ; x < M->VM.size ; ++x){
-/*
-    idx += A->alphabet[C->lines[ M->VM.position[x].row + 1  ]
-                               [ M->VM.position[x].col + C->idx - 1] ] * prod;
-*/
-
-    idx += C->lines[M->VM.position[x].row + 1]
+  for(x = M->VM.size-1 ; x >= 0 ; --x){
+    idx += C->lines[M->VM.position[x].row]
                    [M->VM.position[x].col + C->idx] * prod;
-
     prod *= A->cardinality;
     }
 

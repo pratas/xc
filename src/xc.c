@@ -34,7 +34,7 @@ int Compress(Parameters *P, uint8_t id, INF *I, MCLASS *MC){
   PModel      **pModel, *MX;
   FloatPModel *PT;
   CBUF        *symBuf = CreateCBuffer(BUFFER_SIZE, BGUARD);
-  CACHE       *CS = CreateCache(50, '\n');
+  CACHE       *CS = CreateCache(5, '\n');
   CMWeight    *WM;
 
   if(P->verbose)
@@ -167,8 +167,18 @@ int Compress(Parameters *P, uint8_t id, INF *I, MCLASS *MC){
           UpdateTolerantModel(MC->CM[model]->TM, pModel[++n], sym);
         ++n;
         }
+/*
+int32_t y, px;
+for(px = 0 ; px < CS->nLines ; ++px){
+  for(y = 0 ; y < 40 ; ++y){
+    fprintf(stderr, "%d ", CS->lines[px][y]);
+    }
+  fprintf(stderr, "\n"); 
+  }
+fprintf(stderr, "=============================\n\n"); 
+*/
 
-      UpdateCache(CS, sym /*readerBuffer[idxPos]*/);
+      UpdateCache(CS, sym, readerBuffer[idxPos]);
       UpdateCBuffer(symBuf);
       }
 
@@ -176,7 +186,6 @@ int Compress(Parameters *P, uint8_t id, INF *I, MCLASS *MC){
   doneoutputtingbits(Writter);
   fclose(Writter);
 
-/*
   Free(name);
   Free(readerBuffer);
 
@@ -194,11 +203,11 @@ int Compress(Parameters *P, uint8_t id, INF *I, MCLASS *MC){
   RemoveWeightModel(WM);
   RemoveFPModel(PT);
   RemoveCBuffer(symBuf);
-  RemoveCache(CS);
-*/
+//  RemoveCache(CS);
+
   fclose(Reader);
   int cardinality = AL->cardinality;
-//  RemoveAlphabet(AL);
+  RemoveAlphabet(AL);
 
   if(P->verbose == 1)
     fprintf(stderr, "Done!                          \n");  // SPACES ARE VALID 
