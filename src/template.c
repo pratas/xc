@@ -12,6 +12,14 @@
 //
 static COORDS template1[] = {{1, 0}};
 
+/*
+//
+//            
+//          1 X  
+//
+static COORDS template1[] = {{0, -1}};
+*/
+
 //
 //          1  
 //            X  

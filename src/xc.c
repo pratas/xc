@@ -167,16 +167,6 @@ int Compress(Parameters *P, uint8_t id, INF *I, MCLASS *MC){
           UpdateTolerantModel(MC->CM[model]->TM, pModel[++n], sym);
         ++n;
         }
-/*
-int32_t y, px;
-for(px = 0 ; px < CS->nLines ; ++px){
-  for(y = 0 ; y < 40 ; ++y){
-    fprintf(stderr, "%d ", CS->lines[px][y]);
-    }
-  fprintf(stderr, "\n"); 
-  }
-fprintf(stderr, "=============================\n\n"); 
-*/
 
       UpdateCache(CS, sym, readerBuffer[idxPos]);
       UpdateCBuffer(symBuf);
