@@ -116,6 +116,9 @@ int Compress(Parameters *P, uint8_t id, INF *I, MCLASS *MC){
 
   I[id].header = _bytes_output;
 
+double prob_models[MC->nModels];
+double bits_best = 0;
+
   CS->idx = LF_GD;
   while((k = fread(readerBuffer, 1, BUFFER_SIZE, Reader)))
     for(idxPos = 0 ; idxPos < k ; ++idxPos){
@@ -139,6 +142,8 @@ int Compress(Parameters *P, uint8_t id, INF *I, MCLASS *MC){
           
         ComputePModel(CM, pModel[n], CM->idx, CM->alphaDen);
         ComputeWeightedFreqs(WM->weight[n], pModel[n], PT, CM->nSym);
+
+prob_models[n] = log2((double) pModel[n]->sum / pModel[n]->freqs[sym]);
  
         if(CM->edits != 0){
           ++n;
@@ -151,6 +156,17 @@ int Compress(Parameters *P, uint8_t id, INF *I, MCLASS *MC){
           }
         ++n;
         }
+
+int b_best = 0;
+double min = prob_models[0];
+for(model = 1 ; model < MC->nModels ; ++model){
+  if(prob_models[model] < min){
+    min = prob_models[model];
+    b_best = model;
+    }
+  }
+
+bits_best += prob_models[b_best];
 
       ComputeMXProbs(PT, MX, AL->cardinality);
       AESym(sym, (int *)(MX->freqs), (int) MX->sum, Writter);
@@ -201,6 +217,11 @@ int Compress(Parameters *P, uint8_t id, INF *I, MCLASS *MC){
 
   if(P->verbose == 1)
     fprintf(stderr, "Done!                          \n");  // SPACES ARE VALID 
+
+fprintf(stderr, "BEST N BITS = %"PRIu64"\n", (uint64_t) bits_best / 8);
+PrintHRBytes((uint64_t) bits_best / 8);
+fprintf(stderr, "\n");
+
 
   I[id].bytes = _bytes_output;
   I[id].size  = i;
